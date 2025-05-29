@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+pretty_colors.html
+pretty_menu.html
+gen-lang-client-0047217501-cc6a9cd648c2.json
+broken_menu.html

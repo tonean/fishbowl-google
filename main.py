@@ -170,6 +170,43 @@ async def handle_user_feedback(action_id: str, feedback: str, feedback_type: str
         logger.error(f"Error handling user feedback: {str(e)}")
         logger.error(f"Traceback: {traceback.format_exc()}")
 
+def format_ai_response(response_text: str) -> str:
+    """Format AI response with clear structure and visual separation"""
+    # Split response into sections if it contains multiple parts
+    sections = response_text.split('\n\n')
+    formatted_sections = []
+    
+    for section in sections:
+        # Skip empty sections
+        if not section.strip():
+            continue
+            
+        # Format code blocks
+        if section.startswith('```'):
+            formatted_sections.append(section)
+            continue
+            
+        # Format lists
+        if section.strip().startswith(('-', '*', '1.', '2.', '3.')):
+            formatted_sections.append(section)
+            continue
+            
+        # Format headers
+        if section.strip().startswith('#'):
+            formatted_sections.append(section)
+            continue
+            
+        # Format regular text with proper line breaks
+        formatted_sections.append(section.strip())
+    
+    # Join sections with clear visual separation
+    formatted_response = '\n\n'.join(formatted_sections)
+    
+    # Add visual separators between major sections
+    formatted_response = formatted_response.replace('\n\n\n', '\n\n---\n\n')
+    
+    return formatted_response
+
 async def call_enhanced_agent(query: str) -> str:
     """Enhanced agent call with improved error handling and performance monitoring"""
     if not SESSION_ID or not CONVERSATION_ID:
@@ -180,7 +217,7 @@ async def call_enhanced_agent(query: str) -> str:
     try:
         logger.info(f"Processing query: {query[:100]}...")
         
-        # Add user message to enhanced memory system (this will extract entities, topics, etc.)
+        # Add user message to enhanced memory system
         user_message = memory_system.add_message(CONVERSATION_ID, "user", query)
         logger.info(f"User message processed - Entities: {len(user_message.entities)}, Topics: {user_message.topics}")
         
@@ -190,7 +227,7 @@ async def call_enhanced_agent(query: str) -> str:
         
         # Check if clarification is needed
         if context_prompt.startswith("I'm not entirely confident"):
-            return context_prompt
+            return format_ai_response(context_prompt)
         
         # Create content for the agent
         content = Content(role="user", parts=[Part(text=context_prompt)])
@@ -211,11 +248,14 @@ async def call_enhanced_agent(query: str) -> str:
                 break
                 
         if response_text:
+            # Format the response
+            formatted_response = format_ai_response(response_text)
+            
             # Add assistant response to enhanced memory system
             assistant_message = memory_system.add_message(
                 CONVERSATION_ID, 
                 "assistant", 
-                response_text,
+                formatted_response,
                 metadata={
                     "response_time": time.time() - start_time,
                     "context_length": len(context_prompt),
@@ -229,10 +269,10 @@ async def call_enhanced_agent(query: str) -> str:
             
             logger.info(f"Response generated - Time: {response_time:.2f}s, Entities: {len(assistant_message.entities)}")
             
-            return response_text
+            return formatted_response
         else:
             logger.warning("No response generated from agent")
-            return "I apologize, but I wasn't able to generate a response. Please try rephrasing your query."
+            return format_ai_response("I apologize, but I wasn't able to generate a response. Please try rephrasing your query.")
         
     except Exception as e:
         logger.error(f"Error in enhanced agent call: {str(e)}")

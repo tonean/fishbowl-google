@@ -21,7 +21,6 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-
         }
 
         .main-container {
@@ -59,7 +58,6 @@
             background: rgba(128, 128, 128, 0.25);
             -webkit-backdrop-filter: blur(10px);
             border-right: 1px solid rgba(255, 255, 255, 0.18);
-            /* box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); */
             position: fixed;
             top: 0;
             left: 0;
@@ -90,7 +88,6 @@
         .header {
             background: rgba(128, 128, 128, 0.25);
             -webkit-backdrop-filter: blur(10px);
-            /* border: 1px solid rgba(255, 255, 255, 0.18); */
             padding: 18px;
             text-align: center;
             box-shadow: 0 8px 32px 0 rgba(61, 66, 124, 0.37);
@@ -324,7 +321,7 @@
         .user-message::before {
             content: 'You';
             position: absolute;
-            top: 20;
+            top: 20px;
             left: 0;
             font-size: 12px;
             font-weight: 600;
@@ -349,6 +346,97 @@
             color: rgba(255, 255, 255, 0.7);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        /* Enhanced formatting for AI responses */
+        .assistant-message pre {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .assistant-message code {
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .assistant-message ul, 
+        .assistant-message ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .assistant-message li {
+            margin: 5px 0;
+        }
+
+        .assistant-message h1,
+        .assistant-message h2,
+        .assistant-message h3,
+        .assistant-message h4,
+        .assistant-message h5,
+        .assistant-message h6 {
+            margin: 15px 0 10px;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .assistant-message hr {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 20px 0;
+        }
+
+        .assistant-message blockquote {
+            border-left: 3px solid rgba(255, 255, 255, 0.2);
+            margin: 10px 0;
+            padding: 5px 0 5px 15px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .assistant-message p {
+            margin: 10px 0;
+        }
+
+        .assistant-message a {
+            color: #64b5f6;
+            text-decoration: none;
+        }
+
+        .assistant-message a:hover {
+            text-decoration: underline;
+        }
+
+        .assistant-message table {
+            border-collapse: collapse;
+            margin: 15px 0;
+            width: 100%;
+        }
+
+        .assistant-message th,
+        .assistant-message td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            text-align: left;
+        }
+
+        .assistant-message th {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .assistant-message strong {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .assistant-message em {
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .input-container {
@@ -471,6 +559,8 @@
             50% { transform: translateY(-5px); }
         }
     </style>
+    <!-- Add Marked.js for markdown parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
 </head>
 <body>
     <div class="main-container" id="main-container">
@@ -535,6 +625,14 @@
         const tabContainer = document.getElementById('tab-container');
         const newTabButton = document.getElementById('new-tab-button');
 
+        // Configure marked for better formatting
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            headerIds: false,
+            mangle: false
+        });
+
         // Tab management
         let tabCounter = 1;
         let activeTabId = 0;
@@ -555,8 +653,8 @@
         let currentTextIndex = 0;
         let currentCharIndex = 0;
         let isTyping = true;
-        let typingSpeed = 100; // milliseconds per character
-        let pauseTime = 2000; // pause between texts
+        let typingSpeed = 100;
+        let pauseTime = 2000;
         
         function animatePlaceholder() {
             const currentText = placeholderTexts[currentTextIndex];
@@ -574,11 +672,11 @@
                 if (currentCharIndex > 0) {
                     currentCharIndex--;
                     messageInput.placeholder = currentText.substring(0, currentCharIndex);
-                    setTimeout(animatePlaceholder, typingSpeed / 2); // Erase faster
+                    setTimeout(animatePlaceholder, typingSpeed / 2);
                 } else {
                     currentTextIndex = (currentTextIndex + 1) % placeholderTexts.length;
                     isTyping = true;
-                    setTimeout(animatePlaceholder, 500); // Brief pause before next text
+                    setTimeout(animatePlaceholder, 500);
                 }
             }
         }
@@ -590,13 +688,12 @@
             mainContainer.classList.toggle('panel-open');
         });
 
-        // Function to resize tabs based on available space
         function resizeTabsToFit() {
             const tabContainerWidth = tabContainer.offsetWidth;
-            const newTabButtonWidth = newTabButton.offsetWidth + 8; // Include margin
+            const newTabButtonWidth = newTabButton.offsetWidth + 8;
             const availableWidth = tabContainerWidth - newTabButtonWidth;
             const tabs = document.querySelectorAll('.chat-tab');
-            const gapWidth = 2; // Gap between tabs
+            const gapWidth = 2;
             const totalGapWidth = (tabs.length - 1) * gapWidth;
             const availableTabWidth = availableWidth - totalGapWidth;
             
@@ -610,7 +707,6 @@
             }
         }
 
-        // Tab functions
         function createTab() {
             const tabId = tabCounter++;
             tabs[tabId] = {
@@ -627,7 +723,6 @@
                 <button class="close-tab">×</button>
             `;
 
-            // Add event listeners
             tabElement.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('close-tab')) {
                     switchTab(tabId);
@@ -640,36 +735,29 @@
             });
 
             tabContainer.appendChild(tabElement);
-            
-            // Scroll to the new tab
             tabElement.scrollIntoView({ behavior: 'smooth', inline: 'nearest' });
-            
             switchTab(tabId);
         }
 
         function switchTab(tabId) {
-            // Update active tab visual state
             document.querySelectorAll('.chat-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             const activeTab = document.querySelector(`[data-tab-id="${tabId}"]`);
             activeTab.classList.add('active');
 
-            // Save current tab's messages
             if (activeTabId !== null) {
                 tabs[activeTabId].messages = Array.from(chatContainer.children).filter(child => 
                     child.classList.contains('message')
                 ).map(msg => ({
-                    content: msg.textContent,
+                    content: msg.innerHTML, // Store HTML instead of textContent
                     isUser: msg.classList.contains('user-message')
                 }));
             }
 
-            // Switch to new tab
             activeTabId = tabId;
             loadTabMessages(tabId);
 
-            // Show/hide app title based on whether tab has messages
             if (tabs[tabId].hasMessages) {
                 appTitle.classList.add('hidden');
             } else {
@@ -679,7 +767,6 @@
 
         function closeTab(tabId) {
             if (Object.keys(tabs).length === 1) {
-                // Don't close the last tab, just clear it
                 tabs[tabId] = {
                     title: 'New Chat',
                     messages: [],
@@ -691,59 +778,65 @@
                 return;
             }
 
-            // Remove tab element
             document.querySelector(`[data-tab-id="${tabId}"]`).remove();
             delete tabs[tabId];
 
-            // If closing active tab, switch to first available tab
             if (activeTabId === tabId) {
                 const firstTabId = Object.keys(tabs)[0];
                 switchTab(parseInt(firstTabId));
             }
         }
 
-        // Add scroll threshold detection
         let isNearBottom = true;
-        const SCROLL_THRESHOLD = 100; // pixels from bottom to trigger auto-scroll
+        const SCROLL_THRESHOLD = 100;
 
         chatContainer.addEventListener('scroll', () => {
             const scrollPosition = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight;
             isNearBottom = scrollPosition < SCROLL_THRESHOLD;
         });
 
-        // Modify addMessage function to respect scroll position
         function addMessage(content, isUser = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
-            messageDiv.textContent = content;
+            
+            if (isUser) {
+                messageDiv.textContent = content;
+            } else {
+                // Parse markdown for AI responses
+                messageDiv.innerHTML = marked.parse(content);
+            }
+            
             chatContainer.appendChild(messageDiv);
             
-            // Only auto-scroll if user was already near bottom
             if (isNearBottom) {
                 setTimeout(() => {
                     chatContainer.scrollTop = chatContainer.scrollHeight;
                 }, 100);
             }
 
-            // Update tab state
             tabs[activeTabId].hasMessages = true;
             if (isUser && tabs[activeTabId].title === 'New Chat') {
                 updateTabTitle(activeTabId, content);
             }
         }
 
-        // Modify loadTabMessages to respect scroll position
         function loadTabMessages(tabId) {
-            // Clear current messages (keep app title)
             const messages = chatContainer.querySelectorAll('.message');
             messages.forEach(msg => msg.remove());
 
-            // Load messages for this tab
             tabs[tabId].messages.forEach(msg => {
-                addMessage(msg.content, msg.isUser);
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.isUser ? 'user-message' : 'assistant-message'}`;
+                
+                if (msg.isUser) {
+                    messageDiv.textContent = msg.content;
+                } else {
+                    messageDiv.innerHTML = msg.content; // Use stored HTML
+                }
+                
+                chatContainer.appendChild(messageDiv);
             });
 
-            // Always scroll to bottom when switching tabs
             setTimeout(() => {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
                 isNearBottom = true;
@@ -759,10 +852,8 @@
             }
         }
 
-        // Event listeners for tabs
         newTabButton.addEventListener('click', createTab);
 
-        // Add event listeners to initial tab
         document.querySelector('.chat-tab').addEventListener('click', (e) => {
             if (!e.target.classList.contains('close-tab')) {
                 switchTab(0);
@@ -774,19 +865,16 @@
             closeTab(0);
         });
 
-        // Resize tabs on window resize
         window.addEventListener('resize', () => {
             setTimeout(resizeTabsToFit, 10);
         });
 
-        // Initial resize
         setTimeout(resizeTabsToFit, 100);
 
         async function sendMessage() {
             const message = messageInput.value.trim();
             if (!message) return;
 
-            // Hide the app title when user sends first message
             appTitle.classList.add('hidden');
 
             addMessage(message, true);
@@ -794,7 +882,6 @@
             sendButton.disabled = true;
 
             typingIndicator.style.display = 'block';
-            // Add a small delay before showing the typing indicator
             setTimeout(() => {
                 typingIndicator.classList.add('visible');
             }, 100);
@@ -803,13 +890,12 @@
             try {
                 await ipcRenderer.invoke('send-message', message);
             } catch (error) {
-                addMessage('Sorry, an error occurred while processing your message.');
                 console.error('Error:', error);
             } finally {
                 typingIndicator.classList.remove('visible');
                 setTimeout(() => {
                     typingIndicator.style.display = 'none';
-                }, 300); // Wait for fade out animation
+                }, 300);
                 sendButton.disabled = false;
                 messageInput.focus();
             }
@@ -819,7 +905,7 @@
             typingIndicator.classList.remove('visible');
             setTimeout(() => {
                 typingIndicator.style.display = 'none';
-            }, 300); // Wait for fade out animation
+            }, 300);
             addMessage(message);
         });
 
@@ -827,8 +913,8 @@
             typingIndicator.classList.remove('visible');
             setTimeout(() => {
                 typingIndicator.style.display = 'none';
-            }, 300); // Wait for fade out animation
-            addMessage('Error: ' + message);
+            }, 300);
+            console.error('Error:', message);
         });
 
         sendButton.addEventListener('click', sendMessage);

@@ -80,3 +80,4 @@ dist/
 out/
 release/
 *.log
+gui_app.py
